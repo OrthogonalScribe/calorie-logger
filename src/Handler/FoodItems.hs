@@ -34,7 +34,7 @@ getFoodItemsR :: Handler Html
 getFoodItemsR = do
     Entity userId user <- requireAuth
     ((_result, widget), enctype) <- runFormPost $ foodItemForm userId
-    entries <- runDB $ selectList [] [Asc FoodItemName]
+    entries <- runDB $ selectList [FoodItemUserId ==. userId] [Asc FoodItemName]
     defaultLayout $ do
         setTitle . toHtml $ userIdent user <> "'s food items"
         [whamlet|

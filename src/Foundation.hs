@@ -226,6 +226,7 @@ instance YesodBreadcrumbs App where
     breadcrumb HomeR = return ("Home", Nothing)
     breadcrumb (AuthR _) = return ("Login", Just HomeR)
     breadcrumb ProfileR = return ("Profile", Just HomeR)
+    breadcrumb FoodItemsR = return ("Food Items", Just HomeR)
     -- TODO: (M) handle FoodItemsR and other new ones
     breadcrumb  _ = return ("home", Nothing)
 
@@ -276,7 +277,7 @@ isAuthenticated :: Handler AuthResult
 isAuthenticated = do
     muid <- maybeAuthId
     return $ case muid of
-        Nothing -> Unauthorized "You must login to access this page"
+        Nothing -> Unauthorized "You must log in to access this page"
         Just _ -> Authorized
 
 instance YesodAuthPersist App
