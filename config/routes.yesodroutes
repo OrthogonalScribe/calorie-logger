@@ -11,8 +11,7 @@
 
 /comments CommentR POST
 
-/food-items FoodItemsR GET
--- TODO: (M) add POST handler
+/food-items FoodItemsR GET POST
 
 -- /log-entries GET POST
 
