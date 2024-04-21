@@ -11,4 +11,9 @@
 
 /comments CommentR POST
 
+/food-items FoodItemsR GET
+-- TODO: (M) add POST handler
+
+-- /log-entries GET POST
+
 /profile ProfileR GET

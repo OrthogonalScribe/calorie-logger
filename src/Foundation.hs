@@ -117,6 +117,11 @@ instance Yesod App where
                     , menuItemAccessCallback = True
                     }
                 , NavbarLeft $ MenuItem
+                    { menuItemLabel = "Food Items"
+                    , menuItemRoute = FoodItemsR
+                    , menuItemAccessCallback = isJust muser
+                    }
+                , NavbarLeft $ MenuItem
                     { menuItemLabel = "Profile"
                     , menuItemRoute = ProfileR
                     , menuItemAccessCallback = isJust muser
@@ -169,9 +174,10 @@ instance Yesod App where
     isAuthorized RobotsR _ = return Authorized
     isAuthorized (StaticR _) _ = return Authorized
 
-    -- the profile route requires that the user is authenticated, so we
+    -- the profile and food-items routes requires that the user is authenticated, so we
     -- delegate to that function
     isAuthorized ProfileR _ = isAuthenticated
+    isAuthorized FoodItemsR _ = isAuthenticated
 
     -- This function creates static content files in the static folder
     -- and names them based on a hash of their content. This allows
@@ -220,6 +226,7 @@ instance YesodBreadcrumbs App where
     breadcrumb HomeR = return ("Home", Nothing)
     breadcrumb (AuthR _) = return ("Login", Just HomeR)
     breadcrumb ProfileR = return ("Profile", Just HomeR)
+    -- TODO: (M) handle FoodItemsR and other new ones
     breadcrumb  _ = return ("home", Nothing)
 
 -- How to run database actions.

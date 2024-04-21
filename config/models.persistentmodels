@@ -6,13 +6,30 @@ User
     password Text Maybe
     UniqueUser ident
     deriving Typeable
+
 Email
     email Text
     userId UserId Maybe
     verkey Text Maybe
     UniqueEmail email
+
 Comment json -- Adding "json" causes ToJSON and FromJSON instances to be derived.
     message Text
     userId UserId Maybe
     deriving Eq
     deriving Show
+
+FoodItem
+    userId UserId
+    name Text
+    -- nutrition data per 100g, initial incomplete representation
+    kcal Double
+    carbs Double
+    protein Double
+    fat Double
+    deriving Show
+
+LogEntry
+    foodItemId  FoodItemId
+    weightG Double
+    btime   UTCTime
