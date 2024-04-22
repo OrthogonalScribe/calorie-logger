@@ -30,6 +30,8 @@ FoodItem
     deriving Show
 
 LogEntry
-    foodItemId  FoodItemId
+    userId UserId
+    foodItemId FoodItemId
     weightG Double
-    btime   UTCTime
+    createdAt UTCTime
+    deriving Show

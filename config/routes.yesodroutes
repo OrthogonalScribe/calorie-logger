@@ -13,6 +13,6 @@
 
 /food-items FoodItemsR GET POST
 
--- /log-entries GET POST
+/log-entries LogEntriesR GET POST
 
 /profile ProfileR GET
