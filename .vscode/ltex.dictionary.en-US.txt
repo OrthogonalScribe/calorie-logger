@@ -1,0 +1,4 @@
+MoSCoW
+Yesod
+Hoogle
+canonicalization
