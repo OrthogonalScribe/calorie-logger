@@ -117,12 +117,12 @@ instance Yesod App where
                     , menuItemAccessCallback = True
                     }
                 , NavbarLeft $ MenuItem
-                    { menuItemLabel = "Log Entries"
+                    { menuItemLabel = "Log entries"
                     , menuItemRoute = LogEntriesR
                     , menuItemAccessCallback = isJust muser
                     }
                 , NavbarLeft $ MenuItem
-                    { menuItemLabel = "Food Items"
+                    { menuItemLabel = "Food items"
                     , menuItemRoute = FoodItemsR
                     , menuItemAccessCallback = isJust muser
                     }
@@ -132,12 +132,12 @@ instance Yesod App where
                     , menuItemAccessCallback = isJust muser
                     }
                 , NavbarRight $ MenuItem
-                    { menuItemLabel = "Login"
+                    { menuItemLabel = "Log in"
                     , menuItemRoute = AuthR LoginR
                     , menuItemAccessCallback = isNothing muser
                     }
                 , NavbarRight $ MenuItem
-                    { menuItemLabel = "Logout"
+                    { menuItemLabel = "Log out"
                     , menuItemRoute = AuthR LogoutR
                     , menuItemAccessCallback = isJust muser
                     }
@@ -230,10 +230,11 @@ instance YesodBreadcrumbs App where
         :: Route App  -- ^ The route the user is visiting currently.
         -> Handler (Text, Maybe (Route App))
     breadcrumb HomeR = return ("Home", Nothing)
-    breadcrumb (AuthR _) = return ("Login", Just HomeR)
+    breadcrumb (AuthR _) = return ("Log in", Just HomeR)
     breadcrumb ProfileR = return ("Profile", Just HomeR)
-    breadcrumb FoodItemsR = return ("Food Items", Just HomeR)
-    breadcrumb LogEntriesR = return ("Log Entries", Just HomeR)
+    -- TODO: (S) DRY up breadcrumb and navbar strings
+    breadcrumb FoodItemsR = return ("Food items", Just HomeR)
+    breadcrumb LogEntriesR = return ("Log entries", Just HomeR)
     breadcrumb  _ = return ("home", Nothing)
 
 -- How to run database actions.
@@ -254,7 +255,7 @@ instance YesodAuth App where
     -- Where to send a user after successful login
     loginDest :: App -> Route App
     loginDest _ = HomeR
-    -- Where to send a user after logout
+    -- Where to send a user after logging out
     logoutDest :: App -> Route App
     logoutDest _ = HomeR
     -- Override the above two destinations when a Referer: header is present

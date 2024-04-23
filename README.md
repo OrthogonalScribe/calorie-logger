@@ -62,7 +62,7 @@ The parenthesized letters in front of the tasks below are the prioritization cat
 - make UI presentable
 	- minor tweaks
 		- [x] **(M)** update copyright statement
-		- [ ] **(M)** s/Logout/Log out
+		- [x] **(M)** s/Logout/Log out/ and similar wording fixes
 		- [ ] **(M)** remove MAGWEG and other leftover items on pages
 	- [ ] **(M)** improve FoodItemsR and LogEntriesR look
 		- direct table row representation in the list pages, or single-entry pages
