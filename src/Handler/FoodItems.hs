@@ -1,21 +1,19 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE QuasiQuotes #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE TypeFamilies #-}
 module Handler.FoodItems where
 
 import Import
+import Yesod.Form.Bootstrap3 (renderBootstrap3, BootstrapFormLayout (BootstrapBasicForm), bfs)
 
 foodItemForm :: UserId -> Form FoodItem
-foodItemForm userId = renderDivs $ FoodItem
+foodItemForm userId = renderBootstrap3 BootstrapBasicForm $ FoodItem
     <$> pure userId
-    <*> areq textField "Name" Nothing
-    <*> areq doubleField "Kcal/100g" Nothing
-    <*> areq doubleField "carbs/100g" Nothing
-    <*> areq doubleField "protein/100g" Nothing
-    <*> areq doubleField "fat/100g" Nothing
+    <*> areq textField (bfs ("Name" :: Text)) Nothing
+    <*> areq doubleField (bfs ("Kcal" :: Text)) Nothing
+    <*> areq doubleField (bfs ("Carbs (g)" :: Text)) Nothing
+    <*> areq doubleField (bfs ("Protein (g)" :: Text)) Nothing
+    <*> areq doubleField (bfs ("Fat (g)" :: Text)) Nothing
 
 postFoodItemsR :: Handler Html
 postFoodItemsR = do
@@ -24,7 +22,7 @@ postFoodItemsR = do
     case result of
         FormSuccess foodItem -> do
             _foodItemId <- runDB $ insert foodItem
-            setMessage [shamlet|Food item #{foodItemName foodItem} created|]
+            setMessage [shamlet|New food item "#{foodItemName foodItem}" created|]
             redirect FoodItemsR
         _ -> defaultLayout $ do
             setMessage "Invalid data entered for new food item!"
@@ -36,30 +34,38 @@ getFoodItemsR = do
     ((_result, widget), enctype) <- runFormPost $ foodItemForm userId
     entries <- runDB $ selectList [FoodItemUserId ==. userId] [Asc FoodItemName]
     defaultLayout $ do
-        setTitle . toHtml $ userIdent user <> "'s food items"
+        setTitle . toHtml $ userIdent user <> "'s food items | Calorie Logger"
         [whamlet|
             <div .ui.container>
 
-                <h1>
-                    Access granted!
+                <h1>Food items
 
-                <p>
-                    This page is protected and access is allowed only for authenticated users.
+                <p>All nutrition data is per 100g
 
-                <p>
-                    MAGWEG-DEBUG: userIdent = <span class="username">#{userIdent user}</span>
-
-                <h2>Add new food item
-                <form method=post action=@{FoodItemsR} enctype=#{enctype}>
-                    ^{widget}
-                    <input type=submit>
-
-                <h2>Food items
-                <p>
                 $if null entries
                     <p>No food items found.
                 $else
-                    <ul>
-                        $forall Entity _foodItemId item <- entries
-                            <li>#{show item}
+                    <table .table>
+                        <tr>
+                            <th scope="col">Name
+                            <th scope="col">Kcal
+                            <th scope="col">Carbs (g)
+                            <th scope="col">Protein (g)
+                            <th scope="col">Fat (g)
+
+                        $forall Entity _ item <- entries
+                            <tr>
+                                <th scope="row">#{foodItemName item}
+                                <td>#{foodItemKcal item}
+                                <td>#{foodItemCarbs item}
+                                <td>#{foodItemProtein item}
+                                <td>#{foodItemFat item}
+
+                <h2>Add new food item
+                <div .row>
+                    <div .col-lg-6>
+                        <div .bs-callout.bs-callout-info.well>
+                            <form .form-horizontal role=form method=post action=@{FoodItemsR} enctype=#{enctype}>
+                                ^{widget}
+                                <button type="submit" .btn .btn-default>Submit
         |]

@@ -1,24 +1,24 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE QuasiQuotes #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE TypeFamilies #-}
 
 module Handler.LogEntries where
 
 import Import
+import Yesod.Form.Bootstrap3 (renderBootstrap3, BootstrapFormLayout (..), bfs)
+import qualified Database.Esqueleto.Legacy as E
+import           Database.Esqueleto.Legacy ((^.))
 
 logEntryForm :: UserId -> Form LogEntry
 logEntryForm userId =
-    renderDivs $ LogEntry
+    renderBootstrap3 BootstrapBasicForm $ LogEntry
         <$> pure userId
-        <*> areq (selectField foodItems) "Food Item" Nothing
-        <*> areq doubleField "weight (g)" Nothing
+        <*> areq (selectField foodItems) (bfs ("Food item" :: Text)) Nothing
+        <*> areq doubleField (bfs ("Weight (g)" :: Text)) Nothing
         <*> lift (liftIO getCurrentTime)
     where
         foodItems = do
-            rows <- runDB $ selectList [] [Asc FoodItemName]
+            rows <- runDB $ selectList [FoodItemUserId ==. userId] [Asc FoodItemName]
             optionsPairs $ map (\r -> (foodItemName $ entityVal r, entityKey r)) rows
 
 postLogEntriesR :: Handler Html
@@ -28,7 +28,7 @@ postLogEntriesR = do
     case result of
         FormSuccess logEntry -> do
             _logEntryId <- runDB $ insert logEntry
-            setMessage [shamlet|Log Entry created at #{show $ logEntryCreatedAt logEntry}|]
+            setMessage [shamlet|New log entry created at #{show $ logEntryCreatedAt logEntry}|]
             redirect LogEntriesR
         _ -> defaultLayout $ do
             setMessage "Invalid data entered for new log entry!"
@@ -38,23 +38,43 @@ getLogEntriesR :: Handler Html
 getLogEntriesR = do
     Entity userId user <- requireAuth
     ((_result, widget), enctype) <- runFormPost $ logEntryForm userId
-    entries <- runDB $ selectList [LogEntryUserId ==. userId] [Asc LogEntryCreatedAt]
+    rows  <- runDB
+        $ E.select
+        $ E.from $ \(log_entry `E.InnerJoin` food_item) -> do
+            E.on $ log_entry ^. LogEntryFoodItemId E.==. food_item ^. FoodItemId
+            E.where_ (log_entry ^. LogEntryUserId E.==. E.val userId)
+            E.orderBy [E.asc $ log_entry ^. LogEntryCreatedAt]
+            return
+                ( food_item ^. FoodItemName
+                , log_entry ^. LogEntryWeightG
+                , log_entry ^. LogEntryCreatedAt
+                )
     defaultLayout $ do
-        setTitle . toHtml $ userIdent user <> "'s log entries"
+        setTitle . toHtml $ userIdent user <> "'s log entries | Calorie Logger"
         [whamlet|
             <div .ui.container>
+                <h1>Log entries
 
-                <h2>Add new log entry
-                <form method=post action=@{LogEntriesR} enctype=#{enctype}>
-                    ^{widget}
-                    <input type=submit>
-
-                <h2>Log Entries
-                <p>
-                $if null entries
+                $if null rows
                     <p>No log entries found.
                 $else
-                    <ul>
-                        $forall Entity _logEntryId entry <- entries
-                            <li>#{show entry}
+                    <table .table>
+                        <tr>
+                            <th scope="col">Food item
+                            <th scope="col">Weight (g)
+                            <th scope="col">Creation time
+
+                        $forall (E.Value foodItemName, E.Value weightG, E.Value createdAt) <- rows
+                            <tr>
+                                <td>#{foodItemName}
+                                <td>#{weightG}
+                                <td>#{show createdAt}
+
+                <h2>Add new log entry
+                <div .row>
+                    <div .col-lg-6>
+                        <div .bs-callout.bs-callout-info.well>
+                            <form .form-horizontal role=form method=post action=@{LogEntriesR} enctype=#{enctype}>
+                                ^{widget}
+                                <button type="submit" .btn .btn-default>Submit
         |]
