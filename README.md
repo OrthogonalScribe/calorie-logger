@@ -61,7 +61,7 @@ The parenthesized letters in front of the tasks below are the prioritization cat
 	- [ ] **(S)** non-user-visible
 - make UI presentable
 	- minor tweaks
-		- [ ] **(M)** update copyright statement
+		- [x] **(M)** update copyright statement
 		- [ ] **(M)** s/Logout/Log out
 		- [ ] **(M)** remove MAGWEG and other leftover items on pages
 	- [ ] **(M)** improve FoodItemsR and LogEntriesR look

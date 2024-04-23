@@ -36,5 +36,5 @@ database:
   database: "_env:YESOD_SQLITE_DATABASE:calorie-logger.sqlite3"
   poolsize: "_env:YESOD_SQLITE_POOLSIZE:10"
 
-copyright: Insert copyright statement here
+copyright: © Copyright 2024, OrthogonalScribe. All rights reserved.
 #analytics: UA-YOURCODE
